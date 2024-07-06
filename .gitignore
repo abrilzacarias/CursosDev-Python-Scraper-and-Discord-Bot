@@ -1,0 +1,13 @@
+# Ignore virtual environment directories
+venv/
+.venv/
+env/
+.env/
+
+# Ignore other files and directories
+__pycache__/
+*.pyc
+.DS_Store
+
+
+secrets.json
