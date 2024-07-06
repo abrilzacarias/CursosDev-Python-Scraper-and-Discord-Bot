@@ -32,9 +32,9 @@ async def search(ctx, searchTerm: str):
     
     if results:
         for course in results:
-            await ctx.send(f"**{course['name']}**\n Creator: {course['creator']}\nLink: {course['url']}")
+            await ctx.send(f"**{course['name']}**\nCreator: {course['creator']}\nLink: {course['url']}")
     else:
-        await ctx.send("No se encontraron cursos que coincidan con la palabra clave.")
+        await ctx.send("No courses matching the keyword were found.")
 #events
 @bot.event
 async def on_ready():
