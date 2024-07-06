@@ -2,6 +2,8 @@
 
 This repository contains a web scraper for [CursosDev](https://www.cursosdev.com) and a Discord bot that can filter and display courses based on user-specified keywords. The scraper extracts course data from the website and stores it in a JSON file, which the Discord bot then uses to respond to user commands.
 
+![image](https://github.com/abrilzacarias/CursosDev-Python-Scraper-and-Discord-Bot/assets/83786610/f26a51ec-25b8-4fec-ba0d-50f137c8c1b1)
+
 
 ## Features
 
