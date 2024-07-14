@@ -3,6 +3,7 @@ venv/
 .venv/
 env/
 .env/
+.env
 
 # Ignore other files and directories
 __pycache__/

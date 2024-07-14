@@ -1,13 +1,8 @@
 from scrapy.item import Field, Item
 from scrapy.spiders import CrawlSpider, Rule
-from scrapy.selector import Selector
 from scrapy.linkextractors import LinkExtractor
-from scrapy.loader import ItemLoader
 from scrapy.crawler import CrawlerProcess
-import schedule
-import time
-import json
-import os
+from config import connection
 
 class Courses(Item):
     name = Field()
@@ -16,6 +11,10 @@ class Courses(Item):
 
 
 class CursosDevCrawler(CrawlSpider):
+    def __init__(self, *args, **kwargs):
+        super(CursosDevCrawler, self).__init__(*args, **kwargs)
+        self.courses = []
+        
     name = 'cursosdev'
     allowed_domains = ['cursosdev.com']
     start_urls = ['https://www.cursosdev.com/']
@@ -30,17 +29,13 @@ class CursosDevCrawler(CrawlSpider):
     rules = (
         #pagination
         Rule(
-            LinkExtractor(allow=r'/?page=[1-5]'), 
+            LinkExtractor(allow=r'/?page=[1-3]'), 
                         follow=True),
         #items
         Rule(
             LinkExtractor(allow=r'/coupons-udemy/'),
             follow=True, callback='parse_items'),
         )
-    
-    def __init__(self, *args, **kwargs):
-        super(CursosDevCrawler, self).__init__(*args, **kwargs)
-        self.courses = []
     
 
     def parse_items(self, response):
@@ -59,41 +54,26 @@ class CursosDevCrawler(CrawlSpider):
         }
         
         self.courses.append(item)
-        #self.logger.debug('Course found: %s', item)
-    
-    def closed(self, reason):
-        self.logger.info('Spider closed: %s. Saving data to courses.json.', reason)
-        with open('courses.json', 'w', encoding='utf-8') as f:
-            json.dump(self.courses, f, ensure_ascii=False, indent=4)
-        self.logger.info('Data saved successfully.')
+        self.saveToDb(item)
 
+    def saveToDb(self, item):
+        try:
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO course (name, creator, url) VALUES (%s, %s, %s)"
+                cursor.execute(sql, (item['name'], item['creator'], item['url']))
+            connection.commit()
+        except Exception as e:
+            self.logger.error(f"Error saving to database: {e}")
 
-def run_scraper():
+def run():
     process = CrawlerProcess()
     process.crawl(CursosDevCrawler)
     process.start()
 
-def scrape_if_empty():
-    if not os.path.exists('courses.json') or os.stat('courses.json').st_size == 0:
-        print("JSON file is empty or does not exist. Running scraper...")
-        run_scraper()
-    else:
-        print("JSON file exists and is not empty. No need to scrape.")
-
-# Schedule the scraper to run twice a day
-schedule.every().day.at("06:00").do(run_scraper)
-schedule.every().day.at("18:05").do(run_scraper)
-
-def start_scheduler():
-    print("Scheduler is running...")
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
 if __name__ == "__main__":
     # Run the scraper manually if desired
     print("Running scraper manually...")
-    run_scraper()
+    run()
 
 
 
