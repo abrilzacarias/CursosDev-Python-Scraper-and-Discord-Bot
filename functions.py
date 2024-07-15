@@ -39,3 +39,15 @@ def deleteOldCourses():
             print(f"Deleted courses scraped more than a week ago ({weekAgoStr})")
     except Exception as e:
         print(e)
+
+def searchCoursesByCreator(creator):
+    todayDate = datetime.now().date()
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT name, creator, url FROM courses WHERE creator LIKE %s AND DATE(date) = %s"
+            cursor.execute(sql, (f'%{creator}%', todayDate))
+            result = cursor.fetchall()
+            return result
+    except Exception as e:
+        print(f"Error: {e}")
+        return []

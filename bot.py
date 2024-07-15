@@ -17,7 +17,6 @@ async def ping(ctx):
 @bot.command()
 async def search(ctx, searchTerm: str):
     results = searchCourses(searchTerm)
-    #print(results)
     if results:
         for course in results:
             name, creator, url = course
@@ -26,7 +25,7 @@ async def search(ctx, searchTerm: str):
         await ctx.send("No courses matching the keyword and today's date were found.")
 
 @search.error
-async def search_error(ctx, error):
+async def searchError(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Please provide a search term. Usage: `!search <term>`')
 
@@ -42,28 +41,39 @@ async def today(ctx):
         await ctx.send("No courses found for today's date.")
 
 
+@bot.command()
+async def search_creator(ctx, creator: str):
+    results = searchCoursesByCreator(creator)
+    if results:
+        for course in results:
+            name, creator, url = course
+            await ctx.send(f"**{name}**\nCreator: {creator}\nLink: {url}")
+    else:
+        await ctx.send(f"No courses found for the creator: {creator}")
+
+@search_creator.error
+async def search_creator_error(ctx, error):
+    if isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send('Please provide a creator name. Usage: `!search_creator <creator_name>`')
+
 async def scheduleDeleteOldCourses():
     while True:
         deleteOldCourses()
         await asyncio.sleep(86400)  # Revisa cada 24 horas (86400 segundos)
 
-# Función para ejecutar el scraper automáticamente a una hora predeterminada todos los días
 async def runDaily():
     while True:
         now = datetime.now()
-        target_time = datetime.combine(now.date(), datetime.strptime("03:00:00", "%H:%M:%S").time())
+        target_time = datetime.combine(now.date(), datetime.strptime("12:00:00", "%H:%M:%S").time())
         
-        # Si la hora objetivo ya ha pasado hoy, configúrala para mañana
         if now > target_time:
             target_time += timedelta(days=1)
         
-        # Calcular el tiempo restante hasta la hora objetivo
         wait_time = (target_time - now).total_seconds()
-        await asyncio.sleep(wait_time)  # Esperar hasta la hora objetivo
+        await asyncio.sleep(wait_time) 
         
-        run()  # Ejecutar el scraper
+        run()  
         
-        # Esperar 24 horas antes de volver a ejecutar
         await asyncio.sleep(86400)
 
 #events

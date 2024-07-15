@@ -29,7 +29,7 @@ class CursosDevCrawler(CrawlSpider):
     rules = (
         #pagination
         Rule(
-            LinkExtractor(allow=r'/?page=[1-3]'), 
+            LinkExtractor(allow=r'/?page=[1-4]'), 
                         follow=True),
         #items
         Rule(
@@ -59,7 +59,7 @@ class CursosDevCrawler(CrawlSpider):
     def saveToDb(self, item):
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO course (name, creator, url) VALUES (%s, %s, %s)"
+                sql = "INSERT INTO courses (name, creator, url) VALUES (%s, %s, %s)"
                 cursor.execute(sql, (item['name'], item['creator'], item['url']))
             connection.commit()
         except Exception as e:
